@@ -11,8 +11,8 @@ func TestOla(t *testing.T) {
     }
 
     t.Run("diz olá para as pessoas", func(t *testing.T) {
-        resultado := Ola("Chris")
-        esperado := "Olá, Chris"
+        resultado := Ola("Renan")
+        esperado := "Olá, Renan"
         verificaMensagemCorreta(t, resultado, esperado)
     })
 
