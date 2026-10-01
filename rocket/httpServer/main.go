@@ -1,44 +1,56 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
-func Log(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		begin := time.Now()
-		next.ServeHTTP(w, r)
-		fmt.Println(r.URL.String(), r.Method, time.Since(begin))
-	})
-}
-
 func main() {
-	mux := http.NewServeMux()
+	r := chi.NewMux()
 
-	mux.HandleFunc("/api/users/{id}", func(w http.ResponseWriter, r *http.Request) {
-		id := r.PathValue("id")
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.RequestID)
+	r.Use(middleware.Logger)
 
-		fmt.Println(id)
-		fmt.Fprintln(w, "Hello, world")
+	r.Get("/horario", func(w http.ResponseWriter, r *http.Request) {
+		now := time.Now()
+		fmt.Fprintln(w, now)
 	})
-	srv := &http.Server{
-		Addr:                         ":8080",
-		Handler:                      Log(mux),
-		DisableGeneralOptionsHandler: false,
-		ReadTimeout:                  10 * time.Second,
-		WriteTimeout:                 10 * time.Second,
-		IdleTimeout:                  1 * time.Minute,
-		MaxHeaderBytes:               0,
-	}
 
-	if err := srv.ListenAndServe(); err != nil {
-		if !errors.Is(err, http.ErrServerClosed) {
-			panic(err)
-		}
-	}
+	r.Route("/api", func(r chi.Router) {
+		r.Route("/v1", func(r chi.Router) {
+			r.Get("/user/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
+				id := chi.URLParam(r, "id")
+				fmt.Fprintln(w, "rota printa ususrio ", id)
+			})
+		})
+		r.Route("/v2", func(r chi.Router) {
+			r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
+				fmt.Fprintln(w, "rota prinat test")
+			})
+		})
 
-	fmt.Println(1)
+		r.With(middleware.RealIP).
+			Get("/realip", func(w http.ResponseWriter, r *http.Request) {
+				fmt.Fprintln(w, "ip")
+			})
+
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.BasicAuth("", map[string]string{
+				"admin": "admin",
+			}))
+
+			r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
+				fmt.Fprintln(w, "pong")
+			})
+		})
+	})
+
+	if err := http.ListenAndServe(":8080", r); err != nil {
+		panic(err)
+	}
 }
