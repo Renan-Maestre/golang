@@ -44,7 +44,7 @@ func main() {
 	}
 
 	querySql := `
-		SELECT * FROM foo WHERE ID = ?;
+		SELECT * FROM foo WHERE ID = ?
 	`
 
 	var u user
@@ -54,29 +54,4 @@ func main() {
 	}
 
 	fmt.Println(u)
-
-	for id := 2; id < 10; id++ {
-		if _, err := db.Exec("INSERT INTO foo (id ) values (?)", id); err != nil {
-			panic(err)
-		}
-	}
-
-	var count int64
-	if err := db.QueryRow("SELECT COUNT(*) FROM foo;").Scan(&count); err != nil {
-		panic(err)
-	}
-	fmt.Println(count)
-
-	input := "1 OR 1 = 1"
-	// deleteSql := fmt.Sprintf(`DELETE FROM foo WHERE ID = %s;`, input)
-	deleteSql := `DELETE FROM foo WHERE ID = ?;`
-
-	if _, err = db.Exec(deleteSql, input); err != nil {
-		panic(err)
-	}
-
-	if err := db.QueryRow("SELECT COUNT(*) FROM foo;").Scan(&count); err != nil {
-		panic(err)
-	}
-	fmt.Println(count)
 }
