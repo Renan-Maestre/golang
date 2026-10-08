@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"crudMemory/api"
+	"crudMemoryDB/internal/api"
 )
 
 func main() {
