@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"crudMemoryDB/internal/api"
+	"crudMemoryDB/internal/store"
+	"crudMemoryDB/internal/user"
 )
 
 func main() {
@@ -18,12 +20,14 @@ func main() {
 }
 
 func run() error {
-	db := make(map[string]api.Users)
-	handler := api.Newhandler(db)
+	repository := store.NewUserMemoryRepository()
+	service := user.NewService(repository)
+	handler := user.NewHandler(service)
+	route := api.NewRouter(handler)
 
 	s := http.Server{
 		Addr:         ":8080",
-		Handler:      handler,
+		Handler:      route,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  time.Minute,
