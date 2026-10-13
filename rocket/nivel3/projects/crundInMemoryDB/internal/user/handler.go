@@ -84,6 +84,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 
 	if err := h.service.Update(body); err != nil {
 		response.JSON(w, response.ApiResponse{Error: err.Error()}, http.StatusBadRequest)
+		return
 	}
 
 	response.JSON(

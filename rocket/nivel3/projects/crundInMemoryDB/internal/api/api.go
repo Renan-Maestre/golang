@@ -24,7 +24,7 @@ func NewRouter(userHandler *user.Handler) http.Handler {
 			r.Post("/", userHandler.Create)
 			r.Get("/", userHandler.FindAll)
 			r.Get("/{idUser}", userHandler.FindByID)
-			r.Put("/{idUser}", userHandler.Update)
+			r.Put("/", userHandler.Update)
 			r.Delete("/{idUser}", userHandler.Delete)
 		})
 	})

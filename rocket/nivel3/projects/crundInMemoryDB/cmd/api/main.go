@@ -20,7 +20,14 @@ func main() {
 }
 
 func run() error {
-	repository := store.NewUserMemoryRepository()
+	db, err := store.NewPostgresDB()
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	repository := store.NewUserPostgresRepository(db)
+	// repository := store.NewUserMemoryRepository()
 	service := user.NewService(repository)
 	handler := user.NewHandler(service)
 	route := api.NewRouter(handler)
